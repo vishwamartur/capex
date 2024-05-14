@@ -14,4 +14,8 @@ const connectDB = async () => {
   }
 };
 
-module.exports = connectDB;
+module.exports = {
+  mongoURI: "YOUR_MONGODB_URI_HERE",
+  jwtSecret: "YOUR_SECRET_KEY_HERE",
+  connectDB,
+};

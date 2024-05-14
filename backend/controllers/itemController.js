@@ -1,21 +1,18 @@
-// /backend/controllers/itemController.js
-
 const Item = require("../models/Item");
-const { body, validationResult } = require("express-validator");
 
-// Create a new item
+// @desc    Create a new item
+// @route   POST /api/items
+// @access  Private (Admin only)
 const createItem = async (req, res) => {
-  await body("name").notEmpty().run(req);
-  await body("location").notEmpty().run(req);
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-
   const { name, description, location } = req.body;
 
   try {
-    const newItem = new Item({ name, description, location });
+    const newItem = new Item({
+      name,
+      description,
+      location,
+    });
+
     const item = await newItem.save();
     res.json(item);
   } catch (err) {
@@ -24,7 +21,9 @@ const createItem = async (req, res) => {
   }
 };
 
-// Get all items
+// @desc    Get all items
+// @route   GET /api/items
+// @access  Public
 const getItems = async (req, res) => {
   try {
     const items = await Item.find();
@@ -35,13 +34,17 @@ const getItems = async (req, res) => {
   }
 };
 
-// Get a single item by ID
+// @desc    Get item by ID
+// @route   GET /api/items/:id
+// @access  Public
 const getItemById = async (req, res) => {
   try {
     const item = await Item.findById(req.params.id);
+
     if (!item) {
       return res.status(404).json({ msg: "Item not found" });
     }
+
     res.json(item);
   } catch (err) {
     console.error(err.message);
@@ -52,28 +55,31 @@ const getItemById = async (req, res) => {
   }
 };
 
-// Update an item
+// @desc    Update item
+// @route   PUT /api/items/:id
+// @access  Private (Admin only)
 const updateItem = async (req, res) => {
-  await body("name").notEmpty().run(req);
-  await body("location").notEmpty().run(req);
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
+  const { name, description, location, availabilityStatus } = req.body;
 
-  const { name, description, location } = req.body;
+  const itemFields = {};
+  if (name) itemFields.name = name;
+  if (description) itemFields.description = description;
+  if (location) itemFields.location = location;
+  if (availabilityStatus) itemFields.availabilityStatus = availabilityStatus;
 
   try {
     let item = await Item.findById(req.params.id);
+
     if (!item) {
       return res.status(404).json({ msg: "Item not found" });
     }
 
-    item.name = name;
-    item.description = description;
-    item.location = location;
+    item = await Item.findByIdAndUpdate(
+      req.params.id,
+      { $set: itemFields },
+      { new: true }
+    );
 
-    await item.save();
     res.json(item);
   } catch (err) {
     console.error(err.message);
@@ -84,15 +90,19 @@ const updateItem = async (req, res) => {
   }
 };
 
-// Delete an item
+// @desc    Delete item
+// @route   DELETE /api/items/:id
+// @access  Private (Admin only)
 const deleteItem = async (req, res) => {
   try {
     const item = await Item.findById(req.params.id);
+
     if (!item) {
       return res.status(404).json({ msg: "Item not found" });
     }
 
     await item.remove();
+
     res.json({ msg: "Item removed" });
   } catch (err) {
     console.error(err.message);

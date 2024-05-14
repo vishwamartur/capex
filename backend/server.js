@@ -1,6 +1,9 @@
 const express = require("express");
-const connectDB = require("./config");
-const authMiddleware = require("./utils/authMiddleware");
+const connectDB = require("./routes/db");
+const authRoutes = require("./routes/authRoutes");
+const itemRoutes = require("./routes/itemRoutes");
+const reservationRoutes = require("./routes/reservationRoutes");
+const userRoutes = require("./routes/userRoutes");
 
 const app = express();
 
@@ -8,12 +11,13 @@ const app = express();
 connectDB();
 
 // Init Middleware
-app.use(express.json());
+app.use(express.json({ extended: false }));
 
 // Define Routes
-app.use("/api/items", require("./routes/itemRoutes"));
-app.use("/api/reservations", require("./routes/reservationRoutes"));
-app.use("/api/users", require("./routes/userRoutes"));
+app.use("/api/auth", authRoutes);
+app.use("/api/items", itemRoutes);
+app.use("/api/reservations", reservationRoutes);
+app.use("/api/users", userRoutes);
 
 const PORT = process.env.PORT || 5000;
 

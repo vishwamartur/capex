@@ -1,9 +1,8 @@
-// /backend/controllers/userController.js
-
 const User = require("../models/User");
-const { body, validationResult } = require("express-validator");
 
-// Get all users
+// @desc    Get all users
+// @route   GET /api/users
+// @access  Private (Admin only)
 const getUsers = async (req, res) => {
   try {
     const users = await User.find().select("-password");
@@ -14,13 +13,17 @@ const getUsers = async (req, res) => {
   }
 };
 
-// Get a single user by ID
+// @desc    Get user by ID
+// @route   GET /api/users/:id
+// @access  Private
 const getUserById = async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select("-password");
+
     if (!user) {
       return res.status(404).json({ msg: "User not found" });
     }
+
     res.json(user);
   } catch (err) {
     console.error(err.message);
@@ -31,31 +34,34 @@ const getUserById = async (req, res) => {
   }
 };
 
-// Update a user
+// @desc    Update user
+// @route   PUT /api/users/:id
+// @access  Private
 const updateUser = async (req, res) => {
-  await body("name").notEmpty().run(req);
-  await body("email").isEmail().run(req);
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-
   const { name, email } = req.body;
+
+  const userFields = {};
+  if (name) userFields.name = name;
+  if (email) userFields.email = email;
 
   try {
     let user = await User.findById(req.params.id);
+
     if (!user) {
       return res.status(404).json({ msg: "User not found" });
     }
 
-    if (req.user.role !== "admin") {
-      return res.status(403).json({ msg: "Access denied" });
+    // Ensure the logged in user is updating their own profile or an admin is updating any profile
+    if (user.id.toString() !== req.user.id && req.user.role !== "admin") {
+      return res.status(401).json({ msg: "User not authorized" });
     }
 
-    user.name = name;
-    user.email = email;
+    user = await User.findByIdAndUpdate(
+      req.params.id,
+      { $set: userFields },
+      { new: true }
+    ).select("-password");
 
-    await user.save();
     res.json(user);
   } catch (err) {
     console.error(err.message);
@@ -66,19 +72,19 @@ const updateUser = async (req, res) => {
   }
 };
 
-// Delete a user
+// @desc    Delete user
+// @route   DELETE /api/users/:id
+// @access  Private (Admin only)
 const deleteUser = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
+
     if (!user) {
       return res.status(404).json({ msg: "User not found" });
     }
 
-    if (req.user.role !== "admin") {
-      return res.status(403).json({ msg: "Access denied" });
-    }
-
     await user.remove();
+
     res.json({ msg: "User removed" });
   } catch (err) {
     console.error(err.message);
