@@ -1,7 +1,18 @@
-module.exports = function (req, res, next) {
-  if (req.user && req.user.role === "admin") {
+const User = require("../models/User");
+
+module.exports = async function (req, res, next) {
+  try {
+    // Fetch user from database
+    const user = await User.findById(req.user.id);
+
+    // Check if user exists and if they are an admin
+    if (!user || user.role !== "admin") {
+      return res.status(403).json({ msg: "Access denied: Admins only" });
+    }
+
     next();
-  } else {
-    res.status(403).json({ msg: "Admin authorization required" });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server error");
   }
 };
