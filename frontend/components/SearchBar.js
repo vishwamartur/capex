@@ -1,25 +1,35 @@
-// /frontend/components/SearchBar.js
-
 import React, { useState } from "react";
+import axios from "axios";
+import { Input, Button } from "reactstrap";
 
-const SearchBar = ({ onSearch }) => {
+const SearchBar = ({ setSearchResults }) => {
   const [searchTerm, setSearchTerm] = useState("");
 
-  const handleSearch = (event) => {
-    event.preventDefault();
-    onSearch(searchTerm);
+  const handleSearch = async () => {
+    try {
+      const res = await axios.get(`/api/items/search?q=${searchTerm}`, {
+        headers: {
+          "x-auth-token": localStorage.getItem("token"),
+        },
+      });
+      setSearchResults(res.data);
+    } catch (err) {
+      console.error(err.message);
+    }
   };
 
   return (
-    <form onSubmit={handleSearch}>
-      <input
+    <div className="search-bar">
+      <Input
         type="text"
         placeholder="Search for items..."
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
-      <button type="submit">Search</button>
-    </form>
+      <Button color="primary" onClick={handleSearch}>
+        Search
+      </Button>
+    </div>
   );
 };
 
