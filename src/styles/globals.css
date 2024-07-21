@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom global styles */
+
+/* Example of applying Tailwind utilities directly */
+body {
+  @apply font-sans bg-gray-100;
+}
+
+/* Custom styles without @apply for fundamental utilities */
+.container {
+  /* Use Tailwind utility classes directly in JSX */
+}
+
+.btn-primary {
+  @apply bg-blue-500 text-white py-2 px-4 rounded;
+}
+
+.btn-secondary {
+  @apply bg-gray-500 text-white py-2 px-4 rounded;
+}
+
+/* Avoid using @apply with fundamental utilities like `hidden`, `grid`, etc. */
