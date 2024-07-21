@@ -50,7 +50,7 @@ const ItemList = () => {
       <h2 className="mb-4 text-2xl font-bold">Item List</h2>
       <div className="mb-4">
         <Link href="/admin/add-item">
-          <a className="text-blue-500 underline">Add New Item</a>
+          <div className="text-blue-500 underline">Add New Item</div>
         </Link>
       </div>
       <table className="min-w-full divide-y divide-gray-200">
@@ -84,7 +84,7 @@ const ItemList = () => {
               </td>
               <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
                 <Link href={`/admin/edit-item?id=${item.$id}`}>
-                  <a className="mr-4 text-blue-500 hover:underline">Edit</a>
+                  <div className="mr-4 text-blue-500 hover:underline">Edit</div>
                 </Link>
                 <button
                   onClick={() => handleDelete(item.$id)}
